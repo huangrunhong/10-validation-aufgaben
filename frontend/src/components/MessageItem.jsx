@@ -1,4 +1,4 @@
-const MessageItem = ({ firstName, lastName, email, message }) => {
+const MessageItem = ({ firstName, lastName, email, message, image }) => {
   return (
     <div className="message">
       <h2>
@@ -6,6 +6,7 @@ const MessageItem = ({ firstName, lastName, email, message }) => {
       </h2>
       <h3>{email}</h3>
       <p>{message}</p>
+      <img src={image} alt="image" />
     </div>
   );
 };

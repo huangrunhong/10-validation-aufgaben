@@ -1,15 +1,24 @@
 const express = require("express");
 const { readJsonFile, writeJsonFile } = require("./fsUnit");
 const cors = require("cors");
-const Joi = require("joi");
 
+const { schema } = require("./validation");
+const multer = require("multer");
 const app = express();
+
 const OK = 200;
+const CREATED = 201;
 const INTERNAL_SERVER_ERROR = 500;
 const BAD_REQUEST = 400;
+const uploadMiddleware = multer({ dest: "uploads/" });
 
 app.use(express.json());
 app.use(cors());
+
+app.use((req, res, next) => {
+  console.log("new Request: ", req.method, req.url);
+  next();
+});
 
 app.get("/", (req, res) => {
   readJsonFile("./messages.json")
@@ -24,32 +33,31 @@ app.get("/", (req, res) => {
     });
 });
 
-app.post("/", (req, res) => {
-  const schema = Joi.object({
-    firstName: Joi.string().alphanum().min(3).max(30).required(),
-    lastName: Joi.string().alphanum().min(3).max(30).required(),
-    email: Joi.string().email({
-      minDomainSegments: 2,
-      tlds: { allow: ["com", "net", "de"] },
-    }),
-    message: Joi.string().min(3).max(1000).required(),
-    id: Joi.number(),
-  });
+app.post("/", uploadMiddleware.single("image"), (req, res) => {
+  const { value, error } = schema.validate(req.body);
+  if (error) {
+    res
+      .status(BAD_REQUEST)
+      .json({ success: false, error: "Invalid message", errorInfo: error });
+    return;
+  }
 
   console.log(req.body);
+  console.log(req.file);
   const newMessage = {
     id: Date.now(),
-    firstName: req.body.firstName,
-    lastName: req.body.lastName,
-    email: req.body.email,
-    message: req.body.message,
+    firstName: value.firstName,
+    lastName: value.lastName,
+    email: value.email,
+    message: value.message,
+    image: req.file,
   };
-
-  try {
-    const value = schema.validateAsync(newMessage);
-  } catch (err) {
-    console.log(err);
-  }
+  // ================function schema anrufen===================
+  // try {
+  //   const value = schema.validateAsync(newMessage);
+  // } catch (err) {
+  //   console.log(err);
+  // }
 
   readJsonFile("./messages.json")
     .then((messages) => [newMessage, ...messages])
@@ -57,7 +65,7 @@ app.post("/", (req, res) => {
       writeJsonFile("./messages.json", updatedMessages)
     )
     .then((updatedMessages) =>
-      res.status(OK).json({ success: true, result: updatedMessages })
+      res.status(CREATED).json({ success: true, result: updatedMessages })
     )
     .catch((err) => {
       console.log(err);

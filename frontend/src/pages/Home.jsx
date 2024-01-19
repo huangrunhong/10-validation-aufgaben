@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import "./Home.scss";
-import MessageItem from "../components/messageItem";
+import MessageItem from "../components/MessageItem";
 const Home = () => {
   const [guestMessages, setGuestMessages] = useState([]);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [image, setImage] = useState();
 
   useEffect(() => {
     fetch("http://localhost:9999/", { method: "GET" })
@@ -18,10 +19,19 @@ const Home = () => {
   }, []);
 
   const addMessage = () => {
+    const data = new FormData();
+    data.append("firstName", firstName);
+    data.append("lastName", lastName);
+    data.append("email", email);
+    data.append("message", message);
+    data.append("image", image);
+
+    console.log(data);
+
     fetch("http://localhost:9999/", {
       method: "POST",
-      body: JSON.stringify({ firstName, lastName, email, message }),
-      headers: { "Content-Type": "application/json" },
+      body: data,
+      headers: { "Content-Type": "multipart/form-data;" },
     })
       .then((res) => res.json())
       .then(({ success, result, error }) => {
@@ -29,7 +39,6 @@ const Home = () => {
         else setGuestMessages(result);
       });
   };
-  console.log(guestMessages);
 
   return (
     <section className="homePage">
@@ -63,6 +72,10 @@ const Home = () => {
             onChange={(event) => setMessage(event.target.value)}
             value={message}
           ></textarea>
+          <input
+            type="file"
+            onClick={(event) => setImage(event.target.value)}
+          />
         </form>
         <button onClick={addMessage}>Submit</button>
       </div>
@@ -77,6 +90,7 @@ const Home = () => {
                 lastName={guestMessage.lastName}
                 email={guestMessage.email}
                 message={guestMessage.message}
+                image={guestMessage.image}
               />
             ))
           ) : (
