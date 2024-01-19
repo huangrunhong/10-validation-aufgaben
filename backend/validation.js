@@ -9,6 +9,7 @@ const schema = Joi.object({
   }),
   message: Joi.string().min(3).max(1000).required(),
   id: Joi.number(),
+  image: Joi.string(),
 });
 
 // try {

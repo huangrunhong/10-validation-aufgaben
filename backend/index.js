@@ -1,20 +1,21 @@
 const express = require("express");
 const { readJsonFile, writeJsonFile } = require("./fsUnit");
 const cors = require("cors");
-
-const { schema } = require("./validation");
 const multer = require("multer");
+const { schema } = require("./validation");
+
 const app = express();
 
 const OK = 200;
 const CREATED = 201;
 const INTERNAL_SERVER_ERROR = 500;
 const BAD_REQUEST = 400;
-const uploadMiddleware = multer({ dest: "uploads/" });
+
+const uploadMiddleware = multer({ dest: "./uploads" });
 
 app.use(express.json());
 app.use(cors());
-
+app.use(express.static("static"));
 app.use((req, res, next) => {
   console.log("new Request: ", req.method, req.url);
   next();
@@ -34,7 +35,7 @@ app.get("/", (req, res) => {
 });
 
 app.post("/", uploadMiddleware.single("image"), (req, res) => {
-  const { value, error } = schema.validate(req.body);
+  const { value, error } = schema.validate(req.body, req.file);
   if (error) {
     res
       .status(BAD_REQUEST)

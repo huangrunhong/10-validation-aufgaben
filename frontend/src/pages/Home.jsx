@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./Home.scss";
 import MessageItem from "../components/MessageItem";
 const Home = () => {
@@ -7,7 +7,8 @@ const Home = () => {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
-  const [image, setImage] = useState();
+  const [image, setImage] = useState(null);
+  // const ref = useRef();
 
   useEffect(() => {
     fetch("http://localhost:9999/", { method: "GET" })
@@ -20,15 +21,18 @@ const Home = () => {
 
   const addMessage = () => {
     const data = new FormData();
+    // const fileField = document.querySelector('input[type="file"]');
     data.append("firstName", firstName);
     data.append("lastName", lastName);
     data.append("email", email);
     data.append("message", message);
+
+    // if(ref instanceof)
     data.append("image", image);
 
     console.log(data);
 
-    fetch("http://localhost:9999/", {
+    fetch("http://localhost:9999", {
       method: "POST",
       body: data,
       headers: { "Content-Type": "multipart/form-data;" },
@@ -39,6 +43,8 @@ const Home = () => {
         else setGuestMessages(result);
       });
   };
+
+  console.log(guestMessages);
 
   return (
     <section className="homePage">
@@ -74,7 +80,7 @@ const Home = () => {
           ></textarea>
           <input
             type="file"
-            onClick={(event) => setImage(event.target.value)}
+            onChange={(event) => setImage(event.target.files[0])}
           />
         </form>
         <button onClick={addMessage}>Submit</button>
