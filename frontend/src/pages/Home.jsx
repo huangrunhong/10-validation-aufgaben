@@ -11,7 +11,7 @@ const Home = () => {
   // const ref = useRef();
 
   useEffect(() => {
-    fetch("https://guest-book3.onrender.com/", { method: "GET" })
+    fetch(backendUrl, { method: "GET" })
       .then((res) => res.json())
       .then(({ success, result, error }) => {
         if (!success) console.log(error);
@@ -30,7 +30,7 @@ const Home = () => {
     if (image) {
       data.append("image", image, image.name); // value ist ein string
     }
-    fetch("https://guest-book3.onrender.com/", {
+    fetch(backendUrl, {
       method: "POST",
       body: data,
     })
