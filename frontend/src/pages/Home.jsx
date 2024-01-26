@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import "./Home.scss";
 import MessageItem from "../components/MessageItem";
 const Home = () => {
@@ -27,21 +27,19 @@ const Home = () => {
     data.append("email", email);
     data.append("message", message);
 
-    // if(ref instanceof)
-    data.append("image", image);
-
-    console.log(data);
-
+    if (image) {
+      data.append("image", image, image.name); // value ist ein string
+    }
     fetch("http://localhost:9999", {
       method: "POST",
       body: data,
-      headers: { "Content-Type": "multipart/form-data;" },
     })
       .then((res) => res.json())
       .then(({ success, result, error }) => {
         if (!success) console.log(error);
         else setGuestMessages(result);
       });
+    console.log(data.get("image"));
   };
 
   console.log(guestMessages);

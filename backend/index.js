@@ -11,17 +11,20 @@ const CREATED = 201;
 const INTERNAL_SERVER_ERROR = 500;
 const BAD_REQUEST = 400;
 
-const uploadMiddleware = multer({ dest: "./uploads" });
-
+const storage = multer.diskStorage({
+  destination: "./uploads",
+  filename: (_, file, next) => next(null, file.originalname),
+});
+const uploadMiddleware = multer({ storage: storage });
 app.use(express.json());
 app.use(cors());
-app.use(express.static("static"));
+app.use(express.static("uploads"));
 app.use((req, res, next) => {
   console.log("new Request: ", req.method, req.url);
   next();
 });
 
-app.get("/", (req, res) => {
+app.get("/", (_, res) => {
   readJsonFile("./messages.json")
     .then((messages) =>
       res.status(OK).json({ success: true, result: messages })
@@ -37,6 +40,7 @@ app.get("/", (req, res) => {
 app.post("/", uploadMiddleware.single("image"), (req, res) => {
   const { value, error } = schema.validate(req.body, req.file);
   if (error) {
+    console.log(error);
     res
       .status(BAD_REQUEST)
       .json({ success: false, error: "Invalid message", errorInfo: error });
@@ -51,7 +55,7 @@ app.post("/", uploadMiddleware.single("image"), (req, res) => {
     lastName: value.lastName,
     email: value.email,
     message: value.message,
-    image: req.file,
+    image: `http://localhost:9999/${req.file?.originalname}`,
   };
   // ================function schema anrufen===================
   // try {
