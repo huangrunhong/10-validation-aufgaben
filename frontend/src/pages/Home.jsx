@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "./Home.scss";
 import MessageItem from "../components/MessageItem";
+import { backendUrl } from "../api/api";
 const Home = () => {
   const [guestMessages, setGuestMessages] = useState([]);
   const [firstName, setFirstName] = useState("");
